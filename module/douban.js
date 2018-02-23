@@ -1,13 +1,13 @@
 /**
  * Created by billy on 2017/4/25.
  */
+var g = require("nodeLib");
 var fs = require("fs");
 var path = require("path");
 var config = require("./../config");
 var superagent = require('./libs/superagent');
 var DOMParser = require('xmldom').DOMParser;
 var xpath = require('xpath');
-var Ngocr = require("ng-ocr");
 var _sql;
 var _dom;
 var _file = g.data.file.get("douban");
@@ -15,7 +15,7 @@ module.exports = class {
 	constructor()
 	{
 		_sql = g.data.manager.getManager('local-service');
-		_file.add(__projpath('./modules/sql/douban/'));
+		_file.add(__projpath('./modules/sql/douban'));
 		this.add('init', this.init);
 	}
 
@@ -31,7 +31,6 @@ module.exports = class {
 			trace("sqlStr",sqlStr)
 			_sql.query(sqlStr, ($data) =>
 			{
-				trace("$data",$data)
 				trace("开始尝试登录===========================================")
 				this.login();
 			});
