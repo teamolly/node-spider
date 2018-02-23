@@ -1,0 +1,41 @@
+{
+  "name": "Spider",
+  "info": [
+    {
+      "name": "local-service",
+      "type": "mysql",
+      "param": {
+        "host": "localhost",
+        "user": "root",
+        "password": "root",
+        "database": "test"
+      },
+      "enabled": true
+    },
+    {
+      "name": "node-spider",
+      "type": "script",
+      "param": {
+        "path": "spider.init",
+        "param": "billy"
+      },
+      "module": {
+        "spider": "./module/spider"
+      },
+      "enabled": false
+    },
+    {
+      "name": "douban",
+      "type": "script",
+      "param": {
+        "path": "douban.init",
+        "param": "billy"
+      },
+      "module": {
+        "douban": "./module/douban"
+      },
+      "enabled": true
+    }
+  ],
+  "param": {}
+}
