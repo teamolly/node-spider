@@ -2,11 +2,16 @@
  * Created by Administrator on 2018/2/1 0001.
  */
 var superagent = require('superagent');
-var config = require('./../../config');
+var config = require('./../config/config.zhihu');
 var _cookie = "";
 function post($url, $params, $success, $error)
 {
 	$params.cookie = $params.cookie || "";
+	if ($url.indexOf("http") >= 0)
+	{
+		config.server = "";
+	}
+
 	var promise = new Promise((resolved, rejected) =>
 	{
 		superagent
@@ -46,6 +51,11 @@ function post($url, $params, $success, $error)
 
 function get($url, $params, $success, $error)
 {
+	if ($url.indexOf("http") >= 0)
+	{
+		config.server = "";
+	}
+	trace("config.server", config.server)
 	var promise = new Promise((resolved, rejected) =>
 	{
 		superagent

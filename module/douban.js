@@ -4,18 +4,19 @@
 var g = require("nodeLib");
 var fs = require("fs");
 var path = require("path");
-var config = require("./../config");
+var config = require("./config/config.douban");
 var superagent = require('./libs/superagent');
-var DOMParser = require('xmldom').DOMParser;
-var xpath = require('xpath');
-var _sql;
-var _dom;
+var cheerio = require('cheerio');
 var _file = g.data.file.get("douban");
+var dataPool = require("./data/DataPool");
+var _nextPage = 1;
+var _sql;
+var $;
+
 module.exports = class {
 	constructor()
 	{
 		_sql = g.data.manager.getManager('local-service');
-		_file.add(__projpath('./modules/sql/douban'));
 		this.add('init', this.init);
 	}
 
@@ -24,16 +25,11 @@ module.exports = class {
 // 		0. 获取页面数据
 // 		1. 创建表结构
 // 		2. 登录
-		superagent.get("/").then(($data) =>
+		_file.add(__projpath('./module/sql/douban'));
+		var sqlStr = _file.get("createTable.sql");
+		_sql.query(sqlStr, ($data) =>
 		{
-// 			_dom = new DOMParser().parseFromString($data.text);
-			var sqlStr = _file.get("createTable.sql");
-			trace("sqlStr",sqlStr)
-			_sql.query(sqlStr, ($data) =>
-			{
-				trace("开始尝试登录===========================================")
-				this.login();
-			});
+			this.afterLogin("/");
 		});
 	}
 
@@ -43,12 +39,11 @@ module.exports = class {
 			source: "index_nav",
 			form_email: config.username,
 			form_password: config.password,
-			"captcha-solution": "probable",
-			"captcha-id": "zTEK8ytHBtT4p3X1CSvHlLZG:en"
-		}).then(($list) =>
+			"captcha-solution": "vessel",
+			"captcha-id": "lh3wpPwCYWW3xZlgZWEzY3SF:en"
+		}).then(($data) =>
 		{
 			this.afterLogin();
-			trace("$list", $list)
 		})
 	}
 
@@ -96,8 +91,75 @@ module.exports = class {
 // 		})
 	}
 
-	afterLogin()
+	afterLogin($url)
 	{
-		trace(11111111111111)
+		var promise = new Promise((resolved, rejected) =>
+		{
+			superagent.get($url).then(($data) =>
+			{
+				$ = cheerio.load($data.text);
+				this.resolve($);
+				resolved();
+			}, (err) =>
+			{
+				rejected();
+			})
+		})
+		return promise;
+
 	}
+
+	resolve($)
+	{
+		var list = [];
+		var nodes = $("div.stream-items > div").filter(function (el, index)
+		{
+			return $(this).attr("data-uid") > 0;
+		});
+		convertArray(nodes).forEach(function (el, index)
+		{
+			var itemData = {};
+			itemData.home = $(el).find("div.usr-pic a").attr("href");
+			itemData.author = $(el).find("div.usr-pic a").attr("title");
+			itemData.avatar = $(el).find("div.usr-pic a > img").attr("src");
+			itemData.title = excludeSpecicalChar($(el).find("div.content a").text());
+			itemData.desc = excludeSpecicalChar($(el).find("div.content p").text());
+			list.push(itemData);
+		});
+		dataPool.articlePool.update(list);
+		trace(dataPool.articlePool.list);
+// 		this.toNextPage();
+	}
+
+	toNextPage()
+	{
+		_nextPage++;
+		this.afterLogin("?p=" + _nextPage).then(() =>
+		{
+			setTimeout(() =>
+			{
+				this.toNextPage();
+			}, 3000);
+		}, (err) =>
+		{
+			fs.writeFile("result.json", JSON.stringify(dataPool.articlePool.list), function ()
+			{
+				trace("done")
+				process.exit();
+			});
+		});
+
+	}
+}
+
+function convertArray($obj)
+{
+	return Array.prototype.slice.call($obj)
+}
+
+function excludeSpecicalChar($str)
+{
+	$str = $str.replace(/[\'\"\\\/\b\f\n\r\t]/g, '')
+	$str = $str.replace(/[\@\#\$\%\^\&\*\(\)\{\}\:\<\>\?\[\]\ ]/g, '')
+	return $str;
 }

@@ -34,6 +34,18 @@
       "module": {
         "douban": "./module/douban"
       },
+      "enabled": false
+    },
+    {
+      "name": "zhihu",
+      "type": "script",
+      "param": {
+        "path": "zhihu.init",
+        "param": "billy"
+      },
+      "module": {
+        "zhihu": "./module/zhihu"
+      },
       "enabled": true
     }
   ],
