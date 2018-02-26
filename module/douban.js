@@ -9,6 +9,7 @@ var superagent = require('./libs/superagent');
 var cheerio = require('cheerio');
 var _file = g.data.file.get("douban");
 var dataPool = require("./data/DataPool");
+var util = require("./util/index");
 var _nextPage = 1;
 var _sql;
 var $;
@@ -17,6 +18,7 @@ module.exports = class {
 	constructor()
 	{
 		_sql = g.data.manager.getManager('local-service');
+		_file.add(__projpath("./module/sql/douban"))
 		this.add('init', this.init);
 	}
 
@@ -25,7 +27,6 @@ module.exports = class {
 // 		0. 获取页面数据
 // 		1. 创建表结构
 // 		2. 登录
-		_file.add(__projpath('./module/sql/douban'));
 		var sqlStr = _file.get("createTable.sql");
 		_sql.query(sqlStr, ($data) =>
 		{
@@ -104,7 +105,7 @@ module.exports = class {
 			{
 				rejected();
 			})
-		})
+		});
 		return promise;
 
 	}
@@ -116,50 +117,52 @@ module.exports = class {
 		{
 			return $(this).attr("data-uid") > 0;
 		});
-		convertArray(nodes).forEach(function (el, index)
+		util.convertArray(nodes).forEach(function (el, index)
 		{
 			var itemData = {};
 			itemData.home = $(el).find("div.usr-pic a").attr("href");
 			itemData.author = $(el).find("div.usr-pic a").attr("title");
 			itemData.avatar = $(el).find("div.usr-pic a > img").attr("src");
-			itemData.title = excludeSpecicalChar($(el).find("div.content a").text());
-			itemData.desc = excludeSpecicalChar($(el).find("div.content p").text());
+			itemData.title = util.excludeSpecicalChar($(el).find("div.content a").text());
+			itemData.desc = util.excludeSpecicalChar($(el).find("div.content p").text());
 			list.push(itemData);
 		});
 		dataPool.articlePool.update(list);
-		trace(dataPool.articlePool.list);
-// 		this.toNextPage();
+		this.toNextPage();
 	}
 
 	toNextPage()
 	{
 		_nextPage++;
-		this.afterLogin("?p=" + _nextPage).then(() =>
+		if(_nextPage <= 50)
 		{
-			setTimeout(() =>
+			this.afterLogin("?p=" + _nextPage).then(() =>
 			{
-				this.toNextPage();
-			}, 3000);
-		}, (err) =>
-		{
-			fs.writeFile("result.json", JSON.stringify(dataPool.articlePool.list), function ()
+				setTimeout(() =>
+				{
+					for(var item of dataPool.articlePool.list)
+					{
+						var sqlStr = _file.get("insertData.sql",item);
+						_sql.query(sqlStr,function ($list)
+						{
+							trace("done");
+						})
+					}
+					dataPool.articlePool.removeAll();
+					this.toNextPage();
+				}, 5000);
+			}, (err) =>
 			{
-				trace("done")
-				process.exit();
+				for(var item of dataPool.articlePool.list)
+				{
+					var sqlStr = _file.get("insertData.sql",item);
+					_sql.query(sqlStr,function ($list)
+					{
+						trace("done");
+					})
+				}
 			});
-		});
-
+		}
 	}
 }
 
-function convertArray($obj)
-{
-	return Array.prototype.slice.call($obj)
-}
-
-function excludeSpecicalChar($str)
-{
-	$str = $str.replace(/[\'\"\\\/\b\f\n\r\t]/g, '')
-	$str = $str.replace(/[\@\#\$\%\^\&\*\(\)\{\}\:\<\>\?\[\]\ ]/g, '')
-	return $str;
-}

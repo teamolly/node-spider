@@ -58,13 +58,12 @@ function createData($dObj)
 {
 	var d = {};
 	d.id = Math.random();
-	d.home = "";
+	d.source = "";
 	d.author = "";
-	d.avatar = "";
 	d.title = "";
 	d.desc = "";
-	d.link = "";
-	d.source = "";
+	d.like = "";
+	d.comment = "";
 	d.update = updateData.bind(d);
 	d.update($dObj)
 	return d;
@@ -72,13 +71,12 @@ function createData($dObj)
 
 function updateData($dObj)
 {
-	$dObj.hasOwnProperty("home") && (this.home = $dObj.home);
+	$dObj.hasOwnProperty("source") && (this.source = $dObj.source);
 	$dObj.hasOwnProperty("author") && (this.author = $dObj.author);
-	$dObj.hasOwnProperty("avatar") && (this.avatar = $dObj.avatar);
 	$dObj.hasOwnProperty("title") && (this.title = $dObj.title);
 	$dObj.hasOwnProperty("desc") && (this.desc = $dObj.desc);
-	$dObj.hasOwnProperty("link") && (this.link = $dObj.link);
-	$dObj.hasOwnProperty("source") && (this.source = $dObj.source);
+	$dObj.hasOwnProperty("like") && (this.like = $dObj.like);
+	$dObj.hasOwnProperty("comment") && (this.comment = $dObj.comment);
 }
 
 module.exports = AnswerPool;
