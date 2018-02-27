@@ -1,2 +1,3 @@
-insert into `zhihu` (source,author,title,`desc`,`like`,comment)
-values ("{$source}","{$author}","{$title}","{$desc}","{$like}","{$comment}");
+insert into `zhihu` (originId,avatar,authorIntro,author,title,`desc`,`votes`,comment,createTime)
+values ("{$originId}","{$avatar}","{$authorIntro}","{$author}","{$title}","{$desc}","{$votes}","{$comment}",
+"{$createTime}");

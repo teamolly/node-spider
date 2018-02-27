@@ -3,6 +3,7 @@
  */
 module.exports = {
 	server: "https://www.zhihu.com/",
+	pageSize:10,
 	header: {
 		'authorization':'Bearer' +
 		' 2|1:0|10:1519635953|4:z_c0|80:MS4xZmVlOEF3QUFBQUFtQUFBQVlBSlZUZkViZ1Z1Mk9zc2VGUkZUZFJ3c0NUNkU3azIxbGdHU1NnPT0=|559bf2926576879ea8600b196509637e7b20e18defa3e94eb49e5d6d15a4ae7a',
@@ -16,8 +17,8 @@ module.exports = {
 		grant_type: "password",
 		timestamp: Date.now(),
 		source: "com.zhihu.web",
-		username: "*********",
-		password: "*********",
+		username: "**********",
+		password: "**********",
 		lang: "en",
 		ref_source: "homepage",
 		utm_source: "baidu"

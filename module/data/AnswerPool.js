@@ -20,7 +20,7 @@ class AnswerPool {
 	add($item)
 	{
 		var itemData = createData($item);
-		trace("itemData",itemData)
+		trace("itemData", itemData)
 		if (!_hash[itemData.id])
 		{
 			_hash[itemData.id] = itemData;
@@ -58,12 +58,16 @@ function createData($dObj)
 {
 	var d = {};
 	d.id = Math.random();
-	d.source = "";
+	d.originId = "";
+	d.avatar = "";
+	d.authorIntro = "";
 	d.author = "";
 	d.title = "";
 	d.desc = "";
-	d.like = "";
+	d.votes = "";
 	d.comment = "";
+	d.createTime = "";
+
 	d.update = updateData.bind(d);
 	d.update($dObj)
 	return d;
@@ -71,12 +75,17 @@ function createData($dObj)
 
 function updateData($dObj)
 {
-	$dObj.hasOwnProperty("source") && (this.source = $dObj.source);
+
+	$dObj.hasOwnProperty("originId") && (this.originId = $dObj.originId);
+	$dObj.hasOwnProperty("avatar") && (this.avatar = $dObj.avatar);
+	$dObj.hasOwnProperty("authorIntro") && (this.authorIntro = $dObj.authorIntro);
 	$dObj.hasOwnProperty("author") && (this.author = $dObj.author);
 	$dObj.hasOwnProperty("title") && (this.title = $dObj.title);
 	$dObj.hasOwnProperty("desc") && (this.desc = $dObj.desc);
-	$dObj.hasOwnProperty("like") && (this.like = $dObj.like);
+	$dObj.hasOwnProperty("votes") && (this.votes = $dObj.votes);
 	$dObj.hasOwnProperty("comment") && (this.comment = $dObj.comment);
+	$dObj.hasOwnProperty("createTime") && (this.createTime = $dObj.createTime);
+
 }
 
 module.exports = AnswerPool;

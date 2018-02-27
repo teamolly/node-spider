@@ -29,7 +29,7 @@ module.exports = class {
 	init()
 	{
 		var pageSize = 1;
-		var url = "api/v3/feed/topstory?action_feed=True&limit=" + pageSize + "&session_token=df829fa60f7441bbdea12da5c5b78d90&action=down&after_id=" + (_nextPage * pageSize - 1) + "&desktop=true";
+		var url = "api/v3/feed/topstory?action_feed=True&limit=" + pageSize + "&session_token=df829fa60f7441bbdea12da5c5b78d90&action=down&after_id=" + (_nextPage * config.pageSize - 1) + "&desktop=true";
 		this.afterLogin(url);
 	}
 
@@ -58,7 +58,7 @@ module.exports = class {
 			superagent.get($url).then(($data) =>
 			{
 				var result = JSON.parse($data.text);
-				result = result.paging.data;
+				result = result.data;
 				this.resolve(result);
 				resolved();
 			}, (err) =>
@@ -73,23 +73,34 @@ module.exports = class {
 	resolve($list)
 	{
 		var list = [];
-
+		for (var item of $list)
+		{
+			var tmp = {};
+			tmp.originId = item.target.id;
+			tmp.avatar = item.target.author.avatar_url;
+			tmp.authorIntro = item.target.author.headline;
+			tmp.author = item.target.author.name;
+			tmp.desc = encodeURI(item.target.content);
+			tmp.title = item.target.title;
+			tmp.votes = parseInt(item.target.voteup_count);
+			tmp.comment = parseInt(item.target.comment_count);
+			tmp.createTime = parseInt(item.created_time);
+			list.push(tmp);
+		}
 		dataPool.answerPool.update(list);
-// 		this.toNextPage();
+		this.toNextPage();
 	}
 
 	toNextPage()
 	{
 		_nextPage++;
-		var pageSize = 10;
-		if (_nextPage <= 3)
+		if (_nextPage <= 1000)
 		{
-			var url = "api/v3/feed/topstory?action_feed=True&limit=" + pageSize + "&session_token=df829fa60f7441bbdea12da5c5b78d90&action=down&after_id=" + (_nextPage * pageSize - 1) + "&desktop=true";
+			var url = "api/v3/feed/topstory?action_feed=True&limit=" + config.pageSize + "&session_token=df829fa60f7441bbdea12da5c5b78d90&action=down&after_id=" + (_nextPage * config.pageSize - 1) + "&desktop=true";
 			this.afterLogin(url).then(() =>
 			{
 				setTimeout(() =>
 				{
-					trace("dataPool.answerPool.list", dataPool.answerPool.list)
 					for (var item of dataPool.answerPool.list)
 					{
 						var sqlStr = _file.get("insertData.sql", item);
