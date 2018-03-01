@@ -3,7 +3,8 @@
  */
 var superagent = require('superagent');
 // var config = require('./../config/config.douban');
-var config = require('./../config/config.zhihu');
+// var config = require('./../config/config.zhihu');
+var config = require('./../config/config.ganji');
 var _cookie = "";
 function post($url, $params, $success, $error)
 {

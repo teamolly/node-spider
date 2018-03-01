@@ -4,9 +4,12 @@
 
 var ArticlePool = require("./ArticlePool");
 var AnswerPool = require("./AnswerPool");
+var HousePool = require("./HousePool");
 var articlePool = new ArticlePool();
 var answerPool = new AnswerPool();
+var housePool = new HousePool();
 module.exports = {
 	articlePool: articlePool,
-	answerPool: answerPool
+	answerPool: answerPool,
+	housePool: housePool
 }
