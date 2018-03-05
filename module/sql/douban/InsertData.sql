@@ -1,2 +1,2 @@
-insert into `douban` (home,author,avatar,title,`desc`,link,source)
-values ("{$home}","{$author}","{$avatar}","{$title}","{$desc}","{$link}","{$source}");
+INSERT INTO `douban` (home,author,avatar,title,`desc`,link,source)
+VALUES ("{$home}","{$author}","{$avatar}","{$title}","{$desc}","{$link}","{$source}");

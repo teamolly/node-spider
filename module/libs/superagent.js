@@ -24,12 +24,14 @@ function post($url, $params, $success, $error)
 			.send($params)
 			.on('error', (err)=>
 			{
+				trace("err",err)
 				throw err;
 			})
 			.end((err, res)=>
 			{
 				if (err)
 				{
+					trace("err",err)
 					rejected(err);
 					throw err;
 				}
@@ -52,6 +54,7 @@ function get($url, $params, $success, $error)
 	}
 	var promise = new Promise((resolved, rejected) =>
 	{
+		trace("$url", config.server + $url);
 		superagent
 			.get(config.server + $url)
 			.set(config.header)

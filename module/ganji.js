@@ -10,9 +10,10 @@ var cheerio = require('cheerio');
 var _file = g.data.file.get("ganji");
 var dataPool = require("./data/DataPool");
 var util = require("./util/index");
-var _nextPage = 1;
+var _nextPage = 4;
 var _sql;
 var $;
+var _timer = null;
 
 module.exports = class {
 	constructor()
@@ -25,7 +26,7 @@ module.exports = class {
 
 	init($data, $succcess, $error, $client)
 	{
-		this.afterLogin("/")
+		this.afterLogin("o" + _nextPage + "/")
 	}
 
 	afterLogin($url)
@@ -34,9 +35,12 @@ module.exports = class {
 		{
 			superagent.get($url).then(($data) =>
 			{
-				$ = cheerio.load($data.text);
-				this.resolve($);
-				resolved();
+				setTimeout(() =>
+				{
+					$ = cheerio.load($data.text);
+					this.resolve($);
+					resolved();
+				}, 5000)
 			}, (err) =>
 			{
 				rejected();
@@ -47,63 +51,76 @@ module.exports = class {
 
 	resolve($)
 	{
-		var promises = [];
 		var list = [];
 		var nodes = $("div.f-list-item ");
+		var nodeList = util.convertArray(nodes);
+		var node;
+		crawlLink();
 		var self = this;
-		util.convertArray(nodes).forEach(function (el, index)
+
+		function crawlLink()
 		{
-			var link = $(el).attr("id");
-			if (link.indexOf("-") > 0)
+			if (nodeList.length > 0)
 			{
-				link = link.split("-")[1] + "x.htm";
-				var promise = new Promise((resolved, rejected) =>
+				node = nodeList.shift();
+				var link = $(node).attr("id") || "pass";
+				if (link.indexOf("-") > 0)
 				{
-					setTimeout(function ()
+					link = link.split("-")[1] + "x.htm";
+					superagent.get(link).then(($data) =>
 					{
-						superagent.get(link).then(($data) =>
+						var $$ = cheerio.load($data.text);
+						self.saveData(self.parse($$), ()=>
 						{
-							var $$ = cheerio.load($data.text);
-							list.push(self.parse($$));
-							resolved();
-						}, (err) =>
-						{
-							rejected();
-						})
-					},5000)
-				})
-				promises.push(promise);
+							_timer = setTimeout(() =>
+							{
+								crawlLink();
+								clearTimeout(_timer);
+							}, 5000)
+						});
+
+					})
+				}
 			}
-		});
-		Promise.all(promises).then(() =>
-		{
-			dataPool.housePool.update(list);
-			for (var item of dataPool.housePool.list)
+			else
 			{
-				var sqlStr = _file.get("insertData.sql", item);
-				_sql.query(sqlStr, function ($list)
-				{
-					trace("done");
-				});
+				clearInterval(_timer);
+				self.toNextPage();
 			}
-			trace("dataPool.housePool.list", dataPool.housePool.list);
-			dataPool.housePool.removeAll();
-			this.toNextPage();
-		})
+
+		}
+	}
+
+	saveData($itemData, $callback)
+	{
+		var sqlStr = _file.get("insertData.sql", $itemData);
+		_sql.query(sqlStr, function ($list)
+		{
+			trace("done");
+			$callback && $callback()
+		});
 	}
 
 	parse($$)
 	{
 		var itemData = {};
 		itemData.title = $$("div.card-info p.card-title i").text();
-		itemData.link = $$("input#puid").val() + "x.html";
+		itemData.link = $$("input#puid").val() + "x.htm";
 		itemData.type = $$("div.card-info ul.er-list span.content").eq(0).text();
 		itemData.square = $$("div.card-info ul.er-list span.content").eq(1).text();
 		itemData.direction = $$("div.card-info ul.er-list span.content").eq(2).text();
 		itemData.traffic = $$("div.card-info ul.er-list-two div.subway-wrap span.content").text();
 		itemData.address = $$("div.card-info ul.er-list-two li.er-item a.blue").text();
 		itemData.price = $$("div.card-info ul.card-pay span.num").text();
-		var location = JSON.parse($$("div#baidu_Map").attr("data-ref"));
+		try
+		{
+			var location = JSON.parse($$("div#baidu_Map").attr("data-ref"))
+		}
+		catch (e)
+		{
+			location = {lnglat: "d0,0"}
+		}
+
 		location.lnglat = location.lnglat.substr(1);
 		itemData.lng = location.lnglat.split(",")[0];
 		itemData.lat = location.lnglat.split(",")[1];
