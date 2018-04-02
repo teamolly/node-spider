@@ -24,8 +24,7 @@ function post($url, $params, $success, $error)
 			.send($params)
 			.on('error', (err)=>
 			{
-				trace("err",err)
-				throw err;
+				resolved(err);
 			})
 			.end((err, res)=>
 			{
@@ -54,7 +53,6 @@ function get($url, $params, $success, $error)
 	}
 	var promise = new Promise((resolved, rejected) =>
 	{
-		trace("$url", config.server + $url);
 		superagent
 			.get(config.server + $url)
 			.set(config.header)
@@ -67,13 +65,13 @@ function get($url, $params, $success, $error)
 			{
 				if (err)
 				{
-					rejected();
 					throw err;
+					rejected();
 				}
-				if (res.headers["set-cookie"] && res.headers["set-cookie"][0])
-				{
-					_cookie = res.headers["set-cookie"][0];
-				}
+// 				if (res.headers["set-cookie"] && res.headers["set-cookie"][0])
+// 				{
+// 					_cookie = res.headers["set-cookie"][0];
+// 				}
 				$success && $success();
 				resolved(res);
 			});

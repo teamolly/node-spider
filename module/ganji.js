@@ -10,7 +10,7 @@ var cheerio = require('cheerio');
 var _file = g.data.file.get("ganji");
 var dataPool = require("./data/DataPool");
 var util = require("./util/index");
-var _nextPage = 4;
+var _nextPage = 1;
 var _sql;
 var $;
 var _timer = null;
@@ -26,7 +26,7 @@ module.exports = class {
 
 	init($data, $succcess, $error, $client)
 	{
-		this.afterLogin("o" + _nextPage + "/")
+		this.afterLogin("")
 	}
 
 	afterLogin($url)
@@ -35,12 +35,13 @@ module.exports = class {
 		{
 			superagent.get($url).then(($data) =>
 			{
-				setTimeout(() =>
+				clearTimeout(_timer);
+				_timer = setTimeout(() =>
 				{
 					$ = cheerio.load($data.text);
 					this.resolve($);
 					resolved();
-				}, 5000)
+				}, 10000)
 			}, (err) =>
 			{
 				rejected();
@@ -60,7 +61,7 @@ module.exports = class {
 
 		function crawlLink()
 		{
-			if (nodeList.length > 0)
+			if (nodeList.length > 1)
 			{
 				node = nodeList.shift();
 				var link = $(node).attr("id") || "pass";
@@ -69,22 +70,24 @@ module.exports = class {
 					link = link.split("-")[1] + "x.htm";
 					superagent.get(link).then(($data) =>
 					{
+						trace("link", link)
+						trace("nextPage", _nextPage)
 						var $$ = cheerio.load($data.text);
 						self.saveData(self.parse($$), ()=>
 						{
+							clearTimeout(_timer);
 							_timer = setTimeout(() =>
 							{
 								crawlLink();
 								clearTimeout(_timer);
-							}, 5000)
+							}, 15000)
 						});
-
 					})
 				}
 			}
 			else
 			{
-				clearInterval(_timer);
+				clearTimeout(_timer);
 				self.toNextPage();
 			}
 
@@ -120,7 +123,6 @@ module.exports = class {
 		{
 			location = {lnglat: "d0,0"}
 		}
-
 		location.lnglat = location.lnglat.substr(1);
 		itemData.lng = location.lnglat.split(",")[0];
 		itemData.lat = location.lnglat.split(",")[1];
