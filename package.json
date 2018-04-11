@@ -11,6 +11,8 @@
   "dependencies": {
     "ng-ocr": "^1.6.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "superagent-proxy": "^1.0.3"
+  },
   "proj": "nodecli"
 }

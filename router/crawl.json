@@ -52,11 +52,11 @@
       "name": "ganji",
       "type": "script",
       "param": {
-        "path": "ganji.init",
+        "path": "proxy.init",
         "param": "billy"
       },
       "module": {
-        "ganji": "./module/ganji"
+        "proxy": "./module/proxy/proxy.js"
       },
       "enabled": true
     }
