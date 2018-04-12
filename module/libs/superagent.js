@@ -17,6 +17,7 @@ function post($url, $params, $success, $error) {
 
 	var promise = new Promise((resolved, rejected) => {
 		var proxy = params.proxy;
+		delete $params.proxy;
 		if (proxy) {
 			superagent
 				.post(config.server + $url)
@@ -53,12 +54,12 @@ function post($url, $params, $success, $error) {
 
 function get($url, $params, $success, $error) {
 	var proxy = $params.proxy;
+	delete $params.proxy;
 	if ($url.indexOf("http") >= 0) {
 		config.server = "";
 	}
 	var promise = new Promise((resolved, rejected) =>
 	{
-		trace(proxy,config.server)
 		if (proxy) {
 			superagent
 				.get(config.server + $url)

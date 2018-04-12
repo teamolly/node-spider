@@ -23,7 +23,6 @@ module.exports = class {
 	init($data, $succcess, $error, $client) {
 		this.initEvent();
 		this.initProxy()
-
 	}
 
 	initProxy() {
@@ -40,27 +39,24 @@ module.exports = class {
 	}
 	getProxyList() {
 		trace("正在爬取", config.proxyServer + page);
+		var self = this;
 		var random = Math.floor(Math.random() * proxies.length)
 		var proxy = proxies[random];
 		superagent.get(config.proxyServer + page, {
 			proxy: proxy
 		}).then((response) => {
-			g.log.out(JSON.stringify(response));
+			g.log.out(JSON.stringify(response))
 			if (response.status == 200) {
-				g.fs.writeFile("log/test.log", JSON.stringify(response), {
-					flag: "a"
-				})
 				$ = cheerio.load(response.text);
 				this.cleanoutData($("tbody tr"))
 				timerId = setTimeout(() => {
 					page++;
-					this.getProxyList();
+					self.getProxyList();
 				}, 15000)
 			} else {
 				var list = dataPool.proxyPool.list;
-				this.checkProxy(list)
+				this.checkProxy(list, true)
 				clearTimeout(timerId);
-				process.exit();
 			}
 		});
 	}
@@ -80,7 +76,7 @@ module.exports = class {
 		}
 	}
 
-	checkProxy(proxyList) {
+	checkProxy(proxyList, $isEnd) {
 		var targetOptions = {
 			method: 'GET',
 			url: 'http://ip.chinaz.com/getip.aspx',
@@ -100,7 +96,7 @@ module.exports = class {
 					complete: proxyItem
 				} : proxyItem;
 				var proxy = proxyItem.complete.indexOf("http") < 0 ? "http://" + proxyItem.complete : proxyItem.complete;
-				trace("proxy", proxy)
+				trace("check proxy: ", proxy)
 				superagent.get(targetOptions.url, {
 					proxy: proxy
 				}).then((response) => {
@@ -118,7 +114,9 @@ module.exports = class {
 					if (err) {
 						throw err;
 					}
-					self.getProxyList();
+					if (!$isEnd) {
+						self.getProxyList();
+					}
 				})
 			}
 		}

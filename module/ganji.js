@@ -22,7 +22,6 @@ module.exports = class {
 	}
 
 	init($data, $succcess, $error, $client) {
-		trace(g)
 		event.addListener("PROXYINITED", () => {
 			var targetPath = g.path.resolve(__projpath('./assets/result.json'));
 			var content = g.fs.readFileSync(targetPath).toString();

@@ -20,7 +20,6 @@ class AnswerPool {
 	add($item)
 	{
 		var itemData = createData($item);
-		trace("itemData", itemData)
 		if (!_hash[itemData.id])
 		{
 			_hash[itemData.id] = itemData;
