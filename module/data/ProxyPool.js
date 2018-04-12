@@ -16,7 +16,7 @@ class ProxyPool {
 
 	add($item) {
 		var itemData = createData($item);
-		if (!_hash[itemData.id]) {
+		if (!_hash[itemData.id] && itemData.validTime > 0) {
 			_hash[itemData.id] = itemData;
 			_list.push(itemData);
 		}
@@ -50,7 +50,7 @@ function createData($dObj) {
 	d.port = "";
 	d.address = "";
 	d.protocol = "";
-	d.validTime = "";
+	d.validTime = 0;
 	d.createTime = "";
 	d.complete = "";
 	d.update = updateData.bind(d);
@@ -72,7 +72,7 @@ function updateData($dObj) {
 			$dObj.validTime = $dObj.validTime * 24;
 		} else if ($dObj.validTime.indexOf("小时") >= 0) {
 			var index = $dObj.validTime.indexOf("小时");
-			$dObj.validTime = $dObj.validTime.substr(0, index)
+			$dObj.validTime = int($dObj.validTime.substr(0, index))
 		} else {
 			$dObj.validTime = 0;
 		}

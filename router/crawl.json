@@ -56,6 +56,7 @@
         "param": "billy"
       },
       "module": {
+        "ganji": "./module/ganji.js",
         "proxy": "./module/proxy/proxy.js"
       },
       "enabled": true

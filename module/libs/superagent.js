@@ -56,7 +56,9 @@ function get($url, $params, $success, $error) {
 	if ($url.indexOf("http") >= 0) {
 		config.server = "";
 	}
-	var promise = new Promise((resolved, rejected) => {
+	var promise = new Promise((resolved, rejected) =>
+	{
+		trace(proxy,config.server)
 		if (proxy) {
 			superagent
 				.get(config.server + $url)

@@ -10,37 +10,59 @@ var config = require('../config/config.ganji.js')
 var {
 	convertArray
 } = require('./../util/index')
+var event = require("./../event/emit");
 var page = 1;
 var timerId = null;
 var $;
+var proxies = [];
 module.exports = class {
 	constructor() {
 		this.add('init', this.init);
-		this.promiseList = [];
 	}
 
 	init($data, $succcess, $error, $client) {
-		this.getProxyList();
+		this.initEvent();
+		this.initProxy()
+
 	}
 
+	initProxy() {
+		var targetPath = g.path.resolve(__projpath('./assets/data.json'));
+		var content = g.fs.readFileSync(targetPath).toString();
+		var data = JSON.parse(content);
+		this.checkProxy(data);
+	}
+
+	initEvent() {
+		process.on("exit", function () {
+			trace("程序已经退出")
+		})
+	}
 	getProxyList() {
-		superagent.get(config.proxyServer + page, {}).then((response) => {
-			if (response) {
-				g.fs.writeFile("log/test.log", JSON.stringify(response))
+		trace("正在爬取", config.proxyServer + page);
+		var random = Math.floor(Math.random() * proxies.length)
+		var proxy = proxies[random];
+		superagent.get(config.proxyServer + page, {
+			proxy: proxy
+		}).then((response) => {
+			g.log.out(JSON.stringify(response));
+			if (response.status == 200) {
+				g.fs.writeFile("log/test.log", JSON.stringify(response), {
+					flag: "a"
+				})
 				$ = cheerio.load(response.text);
 				this.cleanoutData($("tbody tr"))
 				timerId = setTimeout(() => {
 					page++;
 					this.getProxyList();
-				}, 10000)
+				}, 15000)
 			} else {
 				var list = dataPool.proxyPool.list;
 				this.checkProxy(list)
 				clearTimeout(timerId);
+				process.exit();
 			}
 		});
-
-
 	}
 
 	cleanoutData($nodeList) {
@@ -65,6 +87,7 @@ module.exports = class {
 			timeout: 8000,
 			encoding: null,
 		};
+		var self = this;
 		var proxys = __merge([], proxyList);
 		var validProxys = [];
 		//这里修改一下，变成你要访问的目标网站
@@ -73,6 +96,9 @@ module.exports = class {
 		function sliceProxy() {
 			if (proxys.length > 0) {
 				var proxyItem = proxys.shift()
+				proxyItem = typeof proxyItem == "string" ? {
+					complete: proxyItem
+				} : proxyItem;
 				var proxy = proxyItem.complete.indexOf("http") < 0 ? "http://" + proxyItem.complete : proxyItem.complete;
 				trace("proxy", proxy)
 				superagent.get(targetOptions.url, {
@@ -86,8 +112,13 @@ module.exports = class {
 					}
 				});
 			} else {
-				g.fs.writeFile("result.log", JSON.stringify(validProxys), {
-					flag: "a"
+				var targetPath = g.path.resolve(__projpath('./assets/result.json'));
+				proxies = __merge([], validProxys);
+				g.fs.writeFile(targetPath, JSON.stringify(validProxys), function (err) {
+					if (err) {
+						throw err;
+					}
+					self.getProxyList();
 				})
 			}
 		}
