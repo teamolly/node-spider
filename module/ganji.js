@@ -29,21 +29,22 @@ module.exports = class {
 			var random = Math.floor(Math.random() * data.length)
 			var proxy = data[random];
 			trace("proxy", proxy)
-			// this.afterLogin("", {
-			// 	proxy: proxy
-			// })
+			this.afterLogin("", {
+				proxy: proxy
+			})
 		})
 	}
 
 	afterLogin($url, $params = {}) {
 		var promise = new Promise((resolved, rejected) => {
-			superagent.get($url, params).then(($data) => {
+			superagent.get($url, $params).then(($data) => {
 				clearTimeout(_timer);
 				_timer = setTimeout(() => {
+					g.log.log($data);
 					$ = cheerio.load($data.text);
 					this.resolve($);
 					resolved();
-				}, 10000)
+				}, config.timeDelay)
 			}, (err) => {
 				rejected();
 			})
@@ -74,7 +75,7 @@ module.exports = class {
 							_timer = setTimeout(() => {
 								crawlLink();
 								clearTimeout(_timer);
-							}, 15000)
+							}, config.timeDelay)
 						});
 					})
 				}

@@ -14,5 +14,6 @@ module.exports = {
 	},
 	client: "http://hz.ganji.com/fang1/",
 	server: "http://hz.ganji.com/fang1/",
-	proxyServer:"http://www.xicidaili.com/wt/"
+	proxyServer:"http://www.xicidaili.com/wt/",
+    timeDelay:Math.random()*(10000) + 5000
 }

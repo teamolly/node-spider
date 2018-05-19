@@ -52,7 +52,7 @@ module.exports = class {
 				timerId = setTimeout(() => {
 					page++;
 					self.getProxyList();
-				}, 15000)
+				}, config.timeDelay)
 			} else {
 				var list = dataPool.proxyPool.list;
 				this.checkProxy(list, true)
@@ -105,7 +105,11 @@ module.exports = class {
 						validProxys.push(proxy);
 						trace(`验证成功==>> ${proxy}`);
 						trace("validProxys", validProxys.length);
-					}
+                    }
+                    else
+					{
+                        trace(`验证失败==>> ${proxy}`);
+                    }
 				});
 			} else {
 				var targetPath = g.path.resolve(__projpath('./assets/result.json'));
@@ -116,6 +120,10 @@ module.exports = class {
 					}
 					if (!$isEnd) {
 						self.getProxyList();
+					}
+					else
+					{
+						event.emitEvent("PROXYINITED")
 					}
 				})
 			}

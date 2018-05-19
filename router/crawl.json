@@ -6,8 +6,8 @@
       "type": "mysql",
       "param": {
         "host": "localhost",
-        "user": "root",
-        "password": "root",
+        "user": "zsy",
+        "password": "123456",
         "database": "test"
       },
       "enabled": true
@@ -56,6 +56,7 @@
         "param": "billy"
       },
       "module": {
+        "ganji": "./module/ganji.js",
         "proxy": "./module/proxy/proxy.js"
       },
       "enabled": true
