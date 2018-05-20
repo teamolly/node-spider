@@ -8,7 +8,7 @@ var dataPool = require('../data/DataPool')
 var cheerio = require('cheerio');
 var config = require('../config/config.ganji.js')
 var {
-	convertArray
+    convertArray
 } = require('./../util/index')
 var event = require("./../event/emit");
 var page = 1;
@@ -16,117 +16,116 @@ var timerId = null;
 var $;
 var proxies = [];
 module.exports = class {
-	constructor() {
-		this.add('init', this.init);
-	}
+    constructor() {
+        this.add('init', this.init);
+    }
 
-	init($data, $succcess, $error, $client) {
-		this.initEvent();
-		this.initProxy()
-	}
+    init($data, $succcess, $error, $client) {
+        this.initEvent();
+        this.initProxy()
+    }
 
-	initProxy() {
-		var targetPath = g.path.resolve(__projpath('./assets/data.json'));
-		var content = g.fs.readFileSync(targetPath).toString();
-		var data = JSON.parse(content);
-		this.checkProxy(data);
-	}
+    initProxy() {
+        var targetPath = g.path.resolve(__projpath('./assets/data.json'));
+        var content = g.fs.readFileSync(targetPath).toString();
+        var data = JSON.parse(content);
+        this.checkProxy(data);
+    }
 
-	initEvent() {
-		process.on("exit", function () {
-			trace("程序已经退出")
-		})
-	}
-	getProxyList() {
-		trace("正在爬取", config.proxyServer + page);
-		var self = this;
-		var random = Math.floor(Math.random() * proxies.length)
-		var proxy = proxies[random];
-		superagent.get(config.proxyServer + page, {
-			proxy: proxy
-		}).then((response) => {
-			g.log.out(JSON.stringify(response))
-			if (response.status == 200) {
-				$ = cheerio.load(response.text);
-				this.cleanoutData($("tbody tr"))
-				timerId = setTimeout(() => {
-					page++;
-					self.getProxyList();
-				}, config.timeDelay)
-			} else {
-				var list = dataPool.proxyPool.list;
-				this.checkProxy(list, true)
-				clearTimeout(timerId);
-			}
-		});
-	}
+    initEvent() {
+        process.on("exit", function () {
+            trace("程序已经退出")
+        })
+    }
 
-	cleanoutData($nodeList) {
-		var nodeList = convertArray($nodeList)
-		for (var node of nodeList) {
-			var item = {};
-			var children = $(node).children();
-			item.ip = children.eq(1).text()
-			item.port = children.eq(2).text()
-			item.address = children.eq(3).children().first().text()
-			item.protocol = children.eq(5).text()
-			item.validTime = children.eq(8).text()
-			item.createTime = children.eq(9).text()
-			dataPool.proxyPool.add(item);
-		}
-	}
+    getProxyList() {
+        trace("正在爬取", config.proxyServer + page);
+        var self = this;
+        var random = Math.floor(Math.random() * proxies.length)
+        var proxy = proxies[random];
+        superagent.get(config.proxyServer + page, {
+            proxy: proxy
+        }).then((response) => {
+            g.log.out(JSON.stringify(response))
+            if (response.status == 200) {
+                $ = cheerio.load(response.text);
+                this.cleanoutData($("tbody tr"))
+                timerId = setTimeout(() => {
+                    page++;
+                    self.getProxyList();
+                }, config.timeDelay)
+            } else {
+                var list = dataPool.proxyPool.list;
+                this.checkProxy(list, true)
+                clearTimeout(timerId);
+            }
+        });
+    }
 
-	checkProxy(proxyList, $isEnd) {
-		var targetOptions = {
-			method: 'GET',
-			url: 'http://ip.chinaz.com/getip.aspx',
-			timeout: 8000,
-			encoding: null,
-		};
-		var self = this;
-		var proxys = __merge([], proxyList);
-		var validProxys = [];
-		//这里修改一下，变成你要访问的目标网站
-		sliceProxy();
+    cleanoutData($nodeList) {
+        var nodeList = convertArray($nodeList)
+        for (var node of nodeList) {
+            var item = {};
+            var children = $(node).children();
+            item.ip = children.eq(1).text()
+            item.port = children.eq(2).text()
+            item.address = children.eq(3).children().first().text()
+            item.protocol = children.eq(5).text()
+            item.validTime = children.eq(8).text()
+            item.createTime = children.eq(9).text()
+            dataPool.proxyPool.add(item);
+        }
+    }
 
-		function sliceProxy() {
-			if (proxys.length > 0) {
-				var proxyItem = proxys.shift()
-				proxyItem = typeof proxyItem == "string" ? {
-					complete: proxyItem
-				} : proxyItem;
-				var proxy = proxyItem.complete.indexOf("http") < 0 ? "http://" + proxyItem.complete : proxyItem.complete;
-				trace("check proxy: ", proxy)
-				superagent.get(targetOptions.url, {
-					proxy: proxy
-				}).then((response) => {
-					sliceProxy();
-					if (response.status == 200) {
-						validProxys.push(proxy);
-						trace(`验证成功==>> ${proxy}`);
-						trace("validProxys", validProxys.length);
+    checkProxy(proxyList, $isEnd) {
+        var targetOptions = {
+            method: 'GET',
+            url: 'http://ip.chinaz.com/getip.aspx',
+            timeout: 8000,
+            encoding: null,
+        };
+        var self = this;
+        var proxys = __merge([], proxyList);
+        var validProxys = [];
+        //这里修改一下，变成你要访问的目标网站
+        sliceProxy();
+
+        function sliceProxy() {
+            if (proxys.length > 0) {
+                var proxyItem = proxys.shift()
+                proxyItem = typeof proxyItem == "string" ? {
+                    complete: proxyItem
+                } : proxyItem;
+                var proxy = proxyItem.complete.indexOf("http") < 0 ? "http://" + proxyItem.complete : proxyItem.complete;
+                trace("check proxy: ", proxy)
+                superagent.get(targetOptions.url, {
+                    proxy: proxy
+                }).then((response) => {
+                    sliceProxy();
+                    if (response.status == 200) {
+                        validProxys.push(proxy);
+                        trace(`验证成功==>> ${proxy}`);
+                        trace("validProxys", validProxys.length);
                     }
-                    else
-					{
+                    else {
                         trace(`验证失败==>> ${proxy}`);
                     }
-				});
-			} else {
-				var targetPath = g.path.resolve(__projpath('./assets/result.json'));
-				proxies = __merge([], validProxys);
-				g.fs.writeFile(targetPath, JSON.stringify(validProxys), function (err) {
-					if (err) {
-						throw err;
-					}
-					if (!$isEnd) {
-						self.getProxyList();
-					}
-					else
-					{
-						event.emitEvent("PROXYINITED")
-					}
-				})
-			}
-		}
-	}
+                });
+            } else {
+                var targetPath = g.path.resolve(__projpath('./assets/result.json'));
+                proxies = __merge([], validProxys);
+                g.fs.writeFile(targetPath, JSON.stringify(validProxys), function (err) {
+                    if (err) {
+                        throw err;
+                    }
+                    if (!$isEnd) {
+                        self.getProxyList();
+                    }
+                    else {
+                        event.emitEvent("PROXYINITED")
+                    }
+                })
+            }
+        }
+    }
 }
