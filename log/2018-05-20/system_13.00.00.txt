@@ -1,4 +1,0 @@
-【2018-5-20 13:11:21】
-{"req":{"method":"GET","url":"http://www.xicidaili.com/wt/1","data":{},"headers":{"user-agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8","accept-encoding":"gzip, deflate","accept-language":"zh-CN,zh;q=0.9","cache-control":"no-cache","connection":"keep-alive","pragma":"no-cache","content-type":"application/json"}},"header":{"date":"Sun, 20 May 2018 05:11:48 GMT","content-length":"22","content-type":"text/plain; charset=utf-8"},"status":429,"text":"429 Too Many Requests\n"}
-
-

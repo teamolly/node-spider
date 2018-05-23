@@ -16,7 +16,7 @@ function post($url, $params, $success, $error) {
 	}
 
 	var promise = new Promise((resolved, rejected) => {
-		var proxy = params.proxy;
+		var proxy = $params.proxy;
 		delete $params.proxy;
 		if (proxy) {
 			superagent
@@ -27,6 +27,10 @@ function post($url, $params, $success, $error) {
 				.send($params)
 				.proxy(proxy)
 				.end((err, res) => {
+					if(err)
+					{
+						rejected();
+					}
 					if (res.headers["set-cookie"] && res.headers["set-cookie"][0]) {
 						_cookie = res.headers["set-cookie"][0];
 					}
@@ -41,11 +45,16 @@ function post($url, $params, $success, $error) {
 				.type("form")
 				.send($params)
 				.end((err, res) => {
+					if(err)
+					{
+						rejected();
+					}
 					if (res.headers["set-cookie"] && res.headers["set-cookie"][0]) {
 						_cookie = res.headers["set-cookie"][0];
 					}
 					$success && $success();
 					resolved(res);
+
 				});
 		}
 	});
@@ -53,6 +62,7 @@ function post($url, $params, $success, $error) {
 }
 
 function get($url, $params, $success, $error) {
+
 	var proxy = $params.proxy;
 	delete $params.proxy;
 	if ($url.indexOf("http") >= 0) {
@@ -67,6 +77,10 @@ function get($url, $params, $success, $error) {
 				.send($params)
 				.proxy(proxy)
 				.end((err, res) => {
+					if(err)
+					{
+						rejected();
+					}
 					$success && $success();
 					resolved(res);
 				});
@@ -76,6 +90,10 @@ function get($url, $params, $success, $error) {
 				.set(config.header)
 				.send($params)
 				.end((err, res) => {
+					if(err)
+					{
+						rejected();
+					}
 					$success && $success();
 					resolved(res);
 				});
