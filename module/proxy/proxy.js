@@ -97,12 +97,11 @@ module.exports = class {
 			method: 'GET',
 			url: 'http://ip.chinaz.com/getip.aspx',
 			timeout: 8000,
-			encoding: null,
+			encoding: null
 		};
 		var self = this;
 		var proxys = __merge([], proxyList);
 		var validProxys = [];
-		//这里修改一下，变成你要访问的目标网站
 		sliceProxy();
 
 		function sliceProxy()

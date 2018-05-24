@@ -25,35 +25,42 @@ module.exports = class {
 
 	init($data, $succcess, $error, $client)
 	{
-       event.addListener("PROXYINITED", () => {
-		var targetPath = g.path.resolve(__projpath('./assets/result.json'));
-		var content = g.fs.readFileSync(targetPath).toString();
-		this.data = typeof content == "object" ? content : JSON.parse(content);
-		this.afterLogin("").then(() => {
-			this.toNextPage();
-		}, (err) => {
-			trace("程序即将退出======================");
-			process.exit();
+		event.addListener("PROXYINITED", () =>
+		{
+			var targetPath = g.path.resolve(__projpath('./assets/result.json'));
+			var content = g.fs.readFileSync(targetPath).toString();
+			this.data = typeof content == "object" ? content : JSON.parse(content);
+			this.afterLogin("").then(() =>
+			{
+				this.toNextPage();
+			}, (err) =>
+			{
+				trace("程序即将退出======================");
+				process.exit();
+			})
 		})
-       })
 	}
 
 	afterLogin($url)
 	{
-		var promise = new Promise((resolved, rejected) => {
+		var promise = new Promise((resolved, rejected) =>
+		{
 			var random = Math.floor(Math.random() * this.data.length)
 			var proxy = this.data[random];
 			trace("开始爬取网站===================")
 			trace("网站代理IP====================", proxy);
-			superagent.get($url, {proxy: proxy}).then(($data) => {
+			superagent.get($url, {proxy: proxy}).then(($data) =>
+			{
 				g.log.out($data);
 				clearTimeout(_timer);
-				_timer = setTimeout(() => {
+				_timer = setTimeout(() =>
+				{
 					$ = cheerio.load($data.text);
 					this.resolveData($);
 					resolved();
 				}, config.timeDelay)
-			}, (err) => {
+			}, (err) =>
+			{
 				g.log.out(err);
 				rejected();
 			})
@@ -81,13 +88,16 @@ module.exports = class {
 					link = link.split("-")[1] + "x.htm";
 					var random = Math.floor(Math.random() * self.data.length)
 					var proxy = self.data[random];
-					superagent.get(link, {proxy: proxy}).then(($data) => {
+					superagent.get(link, {proxy: proxy}).then(($data) =>
+					{
 						trace("link", link)
 						trace("nextPage", _nextPage)
 						var $$ = cheerio.load($data.text);
-						self.saveData(self.parse($$), () => {
+						self.saveData(self.parse($$), () =>
+						{
 							clearTimeout(_timer);
-							_timer = setTimeout(() => {
+							_timer = setTimeout(() =>
+							{
 								crawlLink();
 							}, config.timeDelay)
 						});
@@ -106,11 +116,13 @@ module.exports = class {
 	saveData($itemData, $callback)
 	{
 		var sqlStr = _file.get("insertData.sql", $itemData);
-		_sql.query(sqlStr, function ($list) {
+		_sql.query(sqlStr, function ($list)
+		{
 			trace("done");
 			$callback && $callback()
-		},(err) => {
-			trace("数据存储失败===============",err);
+		}, (err) =>
+		{
+			trace("数据存储失败===============", err);
 		});
 	}
 
@@ -147,14 +159,17 @@ module.exports = class {
 		// 这里缺少一个出口
 		if (_nextPage <= 200000)
 		{
-			this.afterLogin("o" + _nextPage + "/").then(() => {
+			this.afterLogin("o" + _nextPage + "/").then(() =>
+			{
 				this.toNextPage();
-			}, (err) => {
+			}, (err) =>
+			{
 
 				for (var item of dataPool.housePool.list)
 				{
 					var sqlStr = _file.get("insertData.sql", item);
-					_sql.query(sqlStr, function ($list) {
+					_sql.query(sqlStr, function ($list)
+					{
 						trace("done");
 					})
 				}
