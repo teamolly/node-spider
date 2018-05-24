@@ -25,8 +25,7 @@ module.exports = class {
 
 	init($data, $succcess, $error, $client)
 	{
-//        event.addListener("PROXYINITED", () => {
-		trace("start crawl=======================")
+       event.addListener("PROXYINITED", () => {
 		var targetPath = g.path.resolve(__projpath('./assets/result.json'));
 		var content = g.fs.readFileSync(targetPath).toString();
 		this.data = typeof content == "object" ? content : JSON.parse(content);
@@ -36,7 +35,7 @@ module.exports = class {
 			trace("程序即将退出======================");
 			process.exit();
 		})
-//        })
+       })
 	}
 
 	afterLogin($url)
@@ -44,7 +43,8 @@ module.exports = class {
 		var promise = new Promise((resolved, rejected) => {
 			var random = Math.floor(Math.random() * this.data.length)
 			var proxy = this.data[random];
-			trace("crawl proxy====================", proxy);
+			trace("开始爬取网站===================")
+			trace("网站代理IP====================", proxy);
 			superagent.get($url, {proxy: proxy}).then(($data) => {
 				g.log.out($data);
 				clearTimeout(_timer);

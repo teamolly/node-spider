@@ -18,7 +18,7 @@ var proxies = [];
 module.exports = class {
 	constructor()
 	{
-//		this.add('init', this.init);
+		this.add('init', this.init);
 	}
 
 	init($data, $succcess, $error, $client)
@@ -37,26 +37,30 @@ module.exports = class {
 
 	initEvent()
 	{
-		process.on("exit", function () {
+		process.on("exit", function ()
+		{
 			trace("程序已经退出")
 		})
 	}
 
 	getProxyList()
 	{
-		trace("正在爬取", config.proxyServer + page);
 		var self = this;
 		var random = Math.floor(Math.random() * proxies.length)
 		var proxy = proxies[random];
+		trace("正在爬取", config.proxyServer + page);
+		trace("代理IP：", proxy);
 		superagent.get(config.proxyServer + page, {
 			proxy: proxy
-		}).then((response) => {
+		}).then((response) =>
+		{
 			g.log.out(JSON.stringify(response))
 			if (response.status == 200)
 			{
 				$ = cheerio.load(response.text);
 				this.cleanoutData($("tbody tr"))
-				timerId = setTimeout(() => {
+				timerId = setTimeout(() =>
+				{
 					page++;
 					self.getProxyList();
 				}, config.timeDelay)
@@ -112,7 +116,8 @@ module.exports = class {
 				var proxy = proxyItem.complete.indexOf("http") < 0 ? "http://" + proxyItem.complete : proxyItem.complete;
 				superagent.get(targetOptions.url, {
 					proxy: proxy
-				}).then((response) => {
+				}).then((response) =>
+				{
 					sliceProxy();
 					if (response.status == 200)
 					{
@@ -123,7 +128,8 @@ module.exports = class {
 					{
 						trace(`验证失败==>> ${proxy}`);
 					}
-				}, (err) => {
+				}, (err) =>
+				{
 					trace(`验证失败==>> ${proxy}`);
 					sliceProxy();
 				});
@@ -134,7 +140,8 @@ module.exports = class {
 				proxies = __merge([], validProxys);
 				trace("验证完毕================", validProxys)
 				trace("存储路径================", targetPath)
-				g.fs.writeFile(targetPath, JSON.stringify(proxies), function (err) {
+				g.fs.writeFile(targetPath, JSON.stringify(proxies), function (err)
+				{
 					if (err)
 					{
 						throw err;
