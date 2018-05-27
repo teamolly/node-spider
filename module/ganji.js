@@ -1,7 +1,7 @@
 /**
  * Created by billy on 2017/4/25.
  */
-var g = require("nodeLib");
+var g = require("./../../nodeLib");
 var config = require("./config/config.ganji");
 var superagent = require('./libs/superagent');
 var cheerio = require('cheerio');
@@ -25,8 +25,8 @@ module.exports = class {
 
 	init($data, $succcess, $error, $client)
 	{
-		event.addListener("PROXYINITED", () =>
-		{
+//		event.addListener("PROXYINITED", () =>
+//		{
 			var targetPath = g.path.resolve(__projpath('./assets/result.json'));
 			var content = g.fs.readFileSync(targetPath).toString();
 			this.data = typeof content == "object" ? content : JSON.parse(content);
@@ -38,7 +38,7 @@ module.exports = class {
 				trace("程序即将退出======================");
 				process.exit();
 			})
-		})
+//		})
 	}
 
 	afterLogin($url)
@@ -48,10 +48,8 @@ module.exports = class {
 			var random = Math.floor(Math.random() * this.data.length)
 			var proxy = this.data[random];
 			trace("开始爬取网站===================")
-			trace("网站代理IP====================", proxy);
-			superagent.get($url, {proxy: proxy}).then(($data) =>
+			superagent.get($url).then(($data) =>
 			{
-				g.log.out($data);
 				clearTimeout(_timer);
 				_timer = setTimeout(() =>
 				{
@@ -88,9 +86,9 @@ module.exports = class {
 					link = link.split("-")[1] + "x.htm";
 					var random = Math.floor(Math.random() * self.data.length)
 					var proxy = self.data[random];
-					superagent.get(link, {proxy: proxy}).then(($data) =>
+					superagent.get(link).then(($data) =>
 					{
-						trace("link", link)
+						trace("link", link);
 						trace("nextPage", _nextPage)
 						var $$ = cheerio.load($data.text);
 						self.saveData(self.parse($$), () =>

@@ -71,6 +71,9 @@ module.exports = class {
 				this.checkProxy(list, true)
 				clearTimeout(timerId);
 			}
+		}, (err) =>
+		{
+			trace("代理爬取出错", err);
 		});
 	}
 
