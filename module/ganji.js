@@ -1,7 +1,7 @@
 /**
  * Created by billy on 2017/4/25.
  */
-var g = require("./../../nodeLib");
+var g = require("nodeLib");
 var config = require("./config/config.ganji");
 var superagent = require('./libs/superagent');
 var cheerio = require('cheerio');
@@ -27,46 +27,41 @@ module.exports = class {
 	{
 //		event.addListener("PROXYINITED", () =>
 //		{
-			var targetPath = g.path.resolve(__projpath('./assets/result.json'));
-			var content = g.fs.readFileSync(targetPath).toString();
-			this.data = typeof content == "object" ? content : JSON.parse(content);
-			this.afterLogin("").then(() =>
-			{
-				this.toNextPage();
-			}, (err) =>
-			{
-				trace("程序即将退出======================");
-				process.exit();
-			})
-//		})
-	}
-
-	afterLogin($url)
-	{
-		var promise = new Promise((resolved, rejected) =>
+// 		var targetPath = g.path.resolve(__projpath('./assets/result.json'));
+// 		var content = g.fs.readFileSync(targetPath).toString();
+// 		this.data = typeof content == "object" ? content : JSON.parse(content);
+		this.afterLogin("", () =>
 		{
-			var random = Math.floor(Math.random() * this.data.length)
-			var proxy = this.data[random];
-			trace("开始爬取网站===================")
-			superagent.get($url).then(($data) =>
-			{
-				clearTimeout(_timer);
-				_timer = setTimeout(() =>
-				{
-					$ = cheerio.load($data.text);
-					this.resolveData($);
-					resolved();
-				}, config.timeDelay)
-			}, (err) =>
-			{
-				g.log.out(err);
-				rejected();
-			})
+			this.toNextPage();
 		});
-		return promise;
+//		})
+		process.on("exit", () =>
+		{
+			trace("爬取结束，即将退出程序==============");
+		})
 	}
 
-	resolveData($)
+	afterLogin($url, $callback)
+	{
+		trace("this.page", _nextPage);
+		superagent.get($url).then(($data) =>
+		{
+			if ($data.text)
+			{
+				$ = cheerio.load($data.text);
+				this.resolveData($, $callback);
+			}
+			else
+			{
+				process.exit();
+			}
+		}, (err) =>
+		{
+			g.log.out(err);
+		})
+	}
+
+	resolveData($, $callback)
 	{
 		var list = [];
 		var nodes = $("div.f-list-item ");
@@ -88,10 +83,9 @@ module.exports = class {
 					var proxy = self.data[random];
 					superagent.get(link).then(($data) =>
 					{
-						trace("link", link);
-						trace("nextPage", _nextPage)
+						trace("this.link", link);
 						var $$ = cheerio.load($data.text);
-						self.saveData(self.parse($$), () =>
+						self.saveData(self.parse($$)).then(() =>
 						{
 							clearTimeout(_timer);
 							_timer = setTimeout(() =>
@@ -105,23 +99,28 @@ module.exports = class {
 			else
 			{
 				clearTimeout(_timer);
-				self.toNextPage();
+				$callback && $callback();
 			}
 
 		}
 	}
 
-	saveData($itemData, $callback)
+	saveData($itemData)
 	{
 		var sqlStr = _file.get("insertData.sql", $itemData);
-		_sql.query(sqlStr, function ($list)
+		var promise = new Promise((resolved, rejected) =>
 		{
-			trace("done");
-			$callback && $callback()
-		}, (err) =>
-		{
-			trace("数据存储失败===============", err);
-		});
+			_sql.query(sqlStr, function ($list)
+			{
+				trace("done");
+				resolved();
+			}, (err) =>
+			{
+				trace("数据存储失败===============", err);
+				rejected();
+			});
+		})
+		return promise;
 	}
 
 	parse($$)
@@ -157,20 +156,9 @@ module.exports = class {
 		// 这里缺少一个出口
 		if (_nextPage <= 200000)
 		{
-			this.afterLogin("o" + _nextPage + "/").then(() =>
+			this.afterLogin("o" + _nextPage + "/", () =>
 			{
 				this.toNextPage();
-			}, (err) =>
-			{
-
-				for (var item of dataPool.housePool.list)
-				{
-					var sqlStr = _file.get("insertData.sql", item);
-					_sql.query(sqlStr, function ($list)
-					{
-						trace("done");
-					})
-				}
 			});
 		}
 	}
