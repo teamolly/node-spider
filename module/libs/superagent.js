@@ -16,17 +16,28 @@ function post($url, $params, $success, $error)
 		config.server = "";
 	}
 
-	var promise = new Promise((resolved, rejected) => {
+	var promise = new Promise((resolved, rejected) =>
+	{
 		superagent
 			.post(config.server + $url)
 			.set(config.header)
 			.set("Cookie", _cookie)
 			.type("form")
 			.send($params)
-			.end((err, res) => {
+			.on('error', (err) =>
+			{
 				if (err)
 				{
 					rejected(err);
+					return;
+				}
+			})
+			.end((err, res) =>
+			{
+				if (err)
+				{
+					rejected(err);
+					return;
 				}
 				if (res.headers["set-cookie"] && res.headers["set-cookie"][0])
 				{
@@ -46,15 +57,26 @@ function get($url, $params, $success, $error)
 	{
 		config.server = "";
 	}
-	var promise = new Promise((resolved, rejected) => {
+	var promise = new Promise((resolved, rejected) =>
+	{
 		superagent
 			.get(config.server + $url)
 			.set(config.header)
 			.send($params)
-			.end((err, res) => {
+			.on('error', (err) =>
+			{
 				if (err)
 				{
 					rejected(err);
+					return;
+				}
+			})
+			.end((err, res) =>
+			{
+				if (err)
+				{
+					rejected(err);
+					return;
 				}
 				$success && $success();
 				resolved(res);

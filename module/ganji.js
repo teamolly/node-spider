@@ -9,7 +9,7 @@ var _file = g.data.file.get("ganji");
 var dataPool = require("./data/DataPool");
 var util = require("./util/index");
 var event = require("./event/emit");
-var _nextPage = 1;
+var _nextPage = 50;
 var _sql;
 var $;
 var _timer = null;
@@ -53,11 +53,13 @@ module.exports = class {
 			}
 			else
 			{
+				g.log.out($data);
 				process.exit();
 			}
 		}, (err) =>
 		{
 			g.log.out(err);
+			process.exit();
 		})
 	}
 
@@ -79,20 +81,34 @@ module.exports = class {
 				if (link.indexOf("-") > 0)
 				{
 					link = link.split("-")[1] + "x.htm";
-					var random = Math.floor(Math.random() * self.data.length)
-					var proxy = self.data[random];
 					superagent.get(link).then(($data) =>
 					{
 						trace("this.link", link);
-						var $$ = cheerio.load($data.text);
-						self.saveData(self.parse($$)).then(() =>
+						if ($data.text)
 						{
-							clearTimeout(_timer);
-							_timer = setTimeout(() =>
+							var $$ = cheerio.load($data.text);
+							self.saveData(self.parse($$)).then(() =>
 							{
+								clearTimeout(_timer);
+								_timer = setTimeout(() =>
+								{
+									crawlLink();
+								}, config.timeDelay)
+							}, (err) =>
+							{
+								g.log.out(err)
 								crawlLink();
-							}, config.timeDelay)
-						});
+							});
+						}
+						else
+						{
+							g.log.out($data);
+							crawlLink();
+						}
+					}, (err) =>
+					{
+						g.log.out(err);
+						crawlLink();
 					})
 				}
 			}

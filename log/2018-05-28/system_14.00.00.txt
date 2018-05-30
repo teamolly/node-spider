@@ -1,0 +1,4 @@
+【2018-5-28 14:25:2】
+{"code":"ER_TRUNCATED_WRONG_VALUE_FOR_FIELD","errno":1366,"sqlMessage":"Incorrect decimal value: '面议' for column 'price' at row 1","sqlState":"HY000","index":1,"sql":"CREATE TABLE IF NOT EXISTS `ganji_test` (\r\n       `id` INT(8) AUTO_INCREMENT PRIMARY KEY NOT NULL,\r\n       `title` VARCHAR(256),\r\n       `link` VARCHAR(256),\r\n       `type` VARCHAR(256),\r\n       `direction` VARCHAR(256),\r\n       `square` VARCHAR(256),\r\n       `traffic` VARCHAR(256),\r\n       `address` VARCHAR(256),\r\n       `lng` VARCHAR(256),\r\n       `lat` VARCHAR(256),\r\n       `price` VARCHAR(256)\r\n);\r\n\r\ninsert into `ganji_test` (title,link,`type`,direction,square,traffic,`address`,lng,lat,price)\r\nvalues (\"光复路134号小区诚信房源 全新家电齐全 拎包入住\",\"3259167736x.htm\",\"1室1厅1卫\",\"南北向\",\"整租  31㎡\",\"距地铁1号线定安路572米\",\"光复路134号小区上城湖滨光复路134号\",\"120.17782\",\"30.255869\",\r\n\"面议\");"}
+
+
